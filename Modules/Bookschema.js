@@ -1,8 +1,9 @@
 'use strict';
 
 //__________________________________// Mongo DB \\ __________________________________\\
+
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/FevBooks');
+// mongoose.connect('mongodb://localhost:27017/FevBooks');
 
 const bookSchema = new mongoose.Schema({
     title: String,
@@ -15,6 +16,55 @@ const bookModel = mongoose.model('book', bookSchema);
 
 
 //__________________________________// Functions \\ __________________________________\\
+
+function mongoFindHandler(obj,res){
+    bookModel.find(obj, function (error, data) {
+            if (error) {
+                console.log('error in getting data', error);
+            } else {
+               
+                res.send(data)
+            }
+        });
+
+}
+
+function fevBooksHandler(req, res) {
+    let userName = req.query.userName;
+    let data = mongoFindHandler({ email: userName },res);
+}
+
+function addBookHandler(req, res) {
+    console.log(3333,req.body)
+            let { bookTitle, bookDescription, bookStatus, userName } = req.body;
+
+            bookModel.create({
+                title: bookTitle,
+                description: bookDescription,
+                status: bookStatus,
+                email: userName
+            }).then(() => {
+
+                mongoFindHandler({ email: userName },res)
+            }
+            );
+        }
+
+function deleteBookHandler(req, res) {
+            let { bookID, userName } = req.query;
+            bookModel.deleteOne({
+                _id: bookID
+            }).then(() => {
+
+                mongoFindHandler({ email: userName },res)
+            }
+            );
+        }
+
+module.exports = { books: fevBooksHandler, addbooks: addBookHandler, deletebooks: deleteBookHandler };
+
+
+//____________________________________________________________________________________\\
 
 // Mongo Functions \\
 // function saveData() {
@@ -43,15 +93,4 @@ const bookModel = mongoose.model('book', bookSchema);
 
 // saveData();
 
-function fevBooksHandler(req, res) {
-    let userName = req.query.userName;
-    bookModel.find({email:userName}, function (error, data) {
-        if (error) {
-            console.log('error in getting data', error);
-        } else {
-            res.send(data);
-        }
-    });
-}
 
-module.exports = fevBooksHandler;
