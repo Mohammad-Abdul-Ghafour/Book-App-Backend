@@ -17,54 +17,69 @@ const bookModel = mongoose.model('book', bookSchema);
 
 //__________________________________// Functions \\ __________________________________\\
 
-function mongoFindHandler(obj,res){
+function mongoFindHandler(obj, res) {
     bookModel.find(obj, function (error, data) {
-            if (error) {
-                console.log('error in getting data', error);
-            } else {
-               
-                res.send(data)
-            }
-        });
+        if (error) {
+            console.log('error in getting data', error);
+        } else {
+
+            res.send(data)
+        }
+    });
 
 }
 
 function fevBooksHandler(req, res) {
     let userName = req.query.userName;
-    let data = mongoFindHandler({ email: userName },res);
+    let data = mongoFindHandler({ email: userName }, res);
 }
 
 function addBookHandler(req, res) {
-    console.log(3333,req.body)
-            let { bookTitle, bookDescription, bookStatus, userName } = req.body;
+    console.log(3333, req.body)
+    let { bookTitle, bookDescription, bookStatus, userName } = req.body;
 
-            bookModel.create({
-                title: bookTitle,
-                description: bookDescription,
-                status: bookStatus,
-                email: userName
-            }).then(() => {
+    bookModel.create({
+        title: bookTitle,
+        description: bookDescription,
+        status: bookStatus,
+        email: userName
+    }).then(() => {
 
-                mongoFindHandler({ email: userName },res)
-            }
-            );
-        }
+        mongoFindHandler({ email: userName }, res)
+    }
+    );
+}
 
 function deleteBookHandler(req, res) {
-            let { bookID, userName } = req.query;
-            bookModel.deleteOne({
-                _id: bookID
-            }).then(() => {
+    let { bookID, userName } = req.query;
+    bookModel.deleteOne({
+        _id: bookID
+    }).then(() => {
 
-                mongoFindHandler({ email: userName },res)
-            }
-            );
-        }
+        mongoFindHandler({ email: userName }, res)
+    }
+    );
+}
 
-module.exports = { books: fevBooksHandler, addbooks: addBookHandler, deletebooks: deleteBookHandler };
+function updateBookHandler (req,res){
+    let {userName, bookTitle, bookDescription, bookStatus,bookID} = req.body;
+    bookModel.findByIdAndUpdate(bookID,{
+        title: bookTitle,
+        description: bookDescription,
+        status: bookStatus
+    }).then(() => {
+
+        mongoFindHandler({ email: userName }, res)
+    }
+    );
+}
+
+
+module.exports = { books: fevBooksHandler, addbooks: addBookHandler, deletebooks: deleteBookHandler,updatebooks:updateBookHandler};
 
 
 //____________________________________________________________________________________\\
+
 
 // Mongo Functions \\
 // function saveData() {
@@ -92,5 +107,3 @@ module.exports = { books: fevBooksHandler, addbooks: addBookHandler, deletebooks
 // }
 
 // saveData();
-
-
